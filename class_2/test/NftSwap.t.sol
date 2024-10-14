@@ -45,7 +45,7 @@ contract NFTSwapTest is Test {
         vm.startPrank(seller);
         uint256 tokenId = 1;           // 定义 tokenId
         uint256 price = 1 ether;       // 定义价格
-
+        uint256 buyer_money = 10 ether;
         // 授权 NFTSwap 合约可以转移卖家的 NFT
         nft.approve(address(nftSwap), 1);
         // 卖家挂单
@@ -54,7 +54,7 @@ contract NFTSwapTest is Test {
 
         // 买家购买 NFT
         vm.startPrank(buyer);
-        vm.deal(buyer, price); // 确保买家有足够的资金
+        vm.deal(buyer, buyer_money); // 确保买家有足够的资金
 
         // 买家支付价格购买 NFT
         nftSwap.purchaseNFT{value: price}(address(nft), tokenId);
