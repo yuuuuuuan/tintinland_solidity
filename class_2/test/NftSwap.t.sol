@@ -41,32 +41,28 @@ contract NFTSwapTest is Test {
         vm.stopPrank();
     }
     function testPurchaseNFT() public {
-        // 卖家挂单 NFT
+
         vm.startPrank(seller);
-        uint256 tokenId = 1;           // 定义 tokenId
-        uint256 price = 1 ether;       // 定义价格
-        uint256 buyer_money = 10 ether;
-        // 授权 NFTSwap 合约可以转移卖家的 NFT
+        uint256 tokenId = 1;
+        uint256 price = 1 ether;
+        //uint256 buyer_money = 10 ether;
+
         nft.approve(address(nftSwap), 1);
-        // 卖家挂单
+
         nftSwap.listNFT(address(nft), tokenId, price);
         vm.stopPrank();
 
-        // 买家购买 NFT
         vm.startPrank(buyer);
-        vm.deal(buyer, buyer_money); // 确保买家有足够的资金
+        //vm.deal(buyer, buyer_money);
 
-        // 买家支付价格购买 NFT
         nftSwap.purchaseNFT{value: price}(address(nft), tokenId);
 
-        // 检查买家是否成为 NFT 的新拥有者
         assertEq(nft.ownerOf(tokenId), buyer);
 
-        // 检查订单是否已被删除
         (uint256 orderPrice, address orderOwner) = nftSwap.orders(address(nft), tokenId);
         //(address orderOwner, uint orderPrice) = nftSwap.orders(address(nft), tokenId);
-        assertEq(orderOwner, address(0));  // 订单持有者应该被重置为 0 地址
-        assertEq(orderPrice, 0);           // 订单价格应该被重置为 0
+        assertEq(orderOwner, address(0));  
+        assertEq(orderPrice, 0);           
 
         vm.stopPrank();
     }

@@ -59,16 +59,31 @@ contract NFTSwap {
         require(msg.value == order.price, "Incorrect payment amount");
 
         IERC721 nftContract = IERC721(_nftContract);
+        require(nftContract.ownerOf(_tokenId) == order.owner, "Invalid owner");
+        require(
+            nftContract.getApproved(_tokenId) == address(this) || 
+            nftContract.isApprovedForAll(order.owner, address(this)), 
+            "Not approved to transfer NFT"
+        );
+
+        // Transfer the NFT
         nftContract.safeTransferFrom(order.owner, msg.sender, _tokenId);
 
-        payable(order.owner).transfer(msg.value);
-	
-	if (msg.value > order.price) {
-	    payable(msg.sender).transfer(msg.value - order.price);
-	}
+        // Transfer Ether to the seller
+        (bool success, ) = order.owner.call{value: msg.value}("");
+        require(success, "Transfer to seller failed");
+
+        // Refund excess payment if applicable
+        if (msg.value > order.price) {
+            (bool refundSuccess, ) = msg.sender.call{value: msg.value - order.price}("");
+            require(refundSuccess, "Refund failed");
+        }
+
+        // Delete the order
         delete orders[_nftContract][_tokenId];
 
         emit NFTPurchased(_nftContract, _tokenId, msg.sender, order.price);
     }
+
 }
 
