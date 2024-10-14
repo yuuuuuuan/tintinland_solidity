@@ -2,7 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "forge-std/Test.sol";
-import "../src/NFTSwap.sol";
+import "../src/NftSwap.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract MockNFT is ERC721 {
