@@ -28,7 +28,40 @@ contract WETH is IERC20 {
     receive() external payable {
         deposit();
     }
+    // 用户可以将 ETH 存入合约，获得等值的 WETH
+    function deposit() public payable {
+        require(msg.value > 0, "Must send ETH to deposit");
 
+        _balances[msg.sender] += msg.value;
+        _totalSupply += msg.value;
+        emit Transfer(address(0), msg.sender, msg.value);
+    }
+
+    // 用户可以将 WETH 转移到其他账户
+    function transfer(address recipient, uint256 amount) public returns (bool) {
+        require(_balances[msg.sender] >= amount, "Insufficient balance");
+        require(recipient != address(0), "Cannot transfer to zero address");
+
+        _balances[msg.sender] -= amount;
+        _balances[recipient] += amount;
+
+        emit Transfer(msg.sender, recipient, amount);
+        return true;
+    }
+
+    // 用户可以将 WETH 兑换回 ETH
+    function withdraw(uint256 amount) public {
+        require(_balances[msg.sender] >= amount, "Insufficient WETH balance");
+
+        _balances[msg.sender] -= amount;
+        _totalSupply -= amount;
+
+        (bool success, ) = payable(msg.sender).call{value: amount}("");
+        require(success, "ETH transfer failed");
+
+        emit Transfer(msg.sender, address(0), amount);
+    }
+/*
     // 存款函数，用户可以发送 ETH，换取等值的 WETH
     function deposit() public payable {
         require(msg.value > 0, "Must send ETH to deposit");
@@ -47,7 +80,7 @@ contract WETH is IERC20 {
         payable(msg.sender).transfer(amount);
         emit Transfer(msg.sender, address(0), amount);
     }
-
+*/
     // ERC20 标准的其他函数实现
     function totalSupply() public view override returns (uint256) {
         return _totalSupply;
@@ -56,7 +89,7 @@ contract WETH is IERC20 {
     function balanceOf(address account) public view override returns (uint256) {
         return _balances[account];
     }
-
+/*
     function transfer(address recipient, uint256 amount) public override returns (bool) {
         require(_balances[msg.sender] >= amount, "Insufficient balance");
 
@@ -66,7 +99,7 @@ contract WETH is IERC20 {
         emit Transfer(msg.sender, recipient, amount);
         return true;
     }
-
+*/
     function allowance(address owner, address spender) public view override returns (uint256) {
         return _allowances[owner][spender];
     }
