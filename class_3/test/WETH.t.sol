@@ -17,56 +17,71 @@ contract WETHTest is Test {
     }
 
     function testDeposit() public {
-        // 设置 user1 为测试调用方
-        vm.startPrank(user1);
 
-        // user1 向 WETH 合约发送 1 ETH
+        vm.deal(user1, 1 ether); 
+        vm.prank(user1); 
         weth.deposit{value: 1 ether}();
 
-        // 检查 user1 的 WETH 余额是否为 1 WETH
         assertEq(weth.balanceOf(user1), 1 ether);
 
-        // 检查合约的总供应量是否增加了 1 WETH
         assertEq(weth.totalSupply(), 1 ether);
 
         vm.stopPrank();
     }
 
-    function testWithdraw() public {
-        // 设置 user1 为测试调用方
-        vm.startPrank(user1);
+function testWithdraw() public {
+        // Arrange: Deposit ETH first
+        uint256 depositAmount = 1 ether;
+        vm.deal(user1, depositAmount);
+        vm.prank(user1);
+        weth.deposit{value: depositAmount}();
 
-        // user1 存入 1 ETH
-        weth.deposit{value: 1 ether}();
-        assertEq(weth.balanceOf(user1), 1 ether);
+        // Act: Withdraw WETH
+        uint256 withdrawAmount = depositAmount;
+        vm.prank(user1);
+        weth.withdraw(withdrawAmount);
 
-        // user1 提取 0.5 ETH
-        weth.withdraw(0.5 ether);
-
-        // 检查 user1 的 WETH 余额是否减少到 0.5 WETH
-        assertEq(weth.balanceOf(user1), 0.5 ether);
-
-        // 检查合约的总供应量是否减少
-        assertEq(weth.totalSupply(), 0.5 ether);
-
-        vm.stopPrank();
+        // Assert: Check balances after withdrawal
+        assertEq(
+            user1.balance,
+            withdrawAmount,
+            "User should hold the withdrawAmount ETH"
+        );
+        assertEq(
+            address(weth).balance,
+            0,
+            "WETH contract should not hold any ETH"
+        );
+        assertEq(
+            weth.balanceOf(address(weth)),
+            0,
+            "WETH contract should not hold any WETH"
+        );
+        assertEq(weth.balanceOf(user1), 0, "User should not hold any WETH");
     }
 
     function testTransfer() public {
         // 设置 user1 和 user2 为测试调用方
-        vm.startPrank(user1);
-
-        // user1 存入 1 ETH
+        vm.deal(user1, 1 ether); 
+        vm.deal(user2, 1 ether); 
+        
+        // 让 user1 存入 1 ether 到 WETH
+        vm.prank(user1);
         weth.deposit{value: 1 ether}();
+        
+        // 验证 user1 的 WETH 余额是否为 1 ether
+        assertEq(weth.balanceOf(user1), 1 ether);
 
-        // user1 转账 0.5 WETH 给 user2
+        // 让 user1 将 0.5 ether 转账给 user2
+        vm.prank(user1);
         weth.transfer(user2, 0.5 ether);
 
-        // 检查 user1 和 user2 的 WETH 余额
+        // 验证转账后两者的 WETH 余额
         assertEq(weth.balanceOf(user1), 0.5 ether);
         assertEq(weth.balanceOf(user2), 0.5 ether);
 
         vm.stopPrank();
     }
+
 }
 

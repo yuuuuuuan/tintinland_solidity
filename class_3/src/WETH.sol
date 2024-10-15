@@ -28,7 +28,7 @@ contract WETH is IERC20 {
     receive() external payable {
         deposit();
     }
-    // 用户可以将 ETH 存入合约，获得等值的 WETH
+
     function deposit() public payable {
         require(msg.value > 0, "Must send ETH to deposit");
 

@@ -19,14 +19,26 @@ contract BallotTest is Test {
         ballot = new Ballot(proposalNames, startTime, endTime);
     }
 
-    // 测试在投票开始时间前投票，应该失败
+    /* 测试在投票开始时间前投票，应该失败
     function testVoteBeforeStartTime() public {
         vm.warp(block.timestamp + 5); // 模拟当前时间为开始时间前
         ballot.giveRightToVote(address(this));
         vm.expectRevert("Voting has not started yet.");
         ballot.vote(0);
+    }*/
+    //[FAIL: EvmError: Revert] testVoteBeforeStartTime() (gas: 14978)
+    function testVoteBeforeStartTime() public {
+        // Simulate time passing, but ensure it's still before the voting start time
+        vm.warp(block.timestamp + 5); // This moves time forward by 5 seconds
+        
+        // Give the current address the right to vote
+        ballot.giveRightToVote(address(this));
+        
+        // Expect a revert when trying to vote before the start time
+        vm.expectRevert("Voting has not started yet.");
+        ballot.vote(0);
     }
-
+    
     // 测试在投票时间窗口内投票，应该成功
     function testVoteDuringVotingPeriod() public {
         vm.warp(block.timestamp + 20); // 模拟当前时间为投票窗口内

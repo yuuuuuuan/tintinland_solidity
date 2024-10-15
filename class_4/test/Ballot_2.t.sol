@@ -42,8 +42,16 @@ contract BallotTest is Test {
         vm.stopPrank();
     }
 
-    // 测试只有合约拥有者能设置投票权重
+    /* 测试只有合约拥有者能设置投票权重
     function testOnlyChairpersonCanSetWeight() public {
+        vm.expectRevert("Only chairperson can set voter weight.");
+        ballot.setVoterWeight(voter1, 5); 
+    }*/
+    function testOnlyChairpersonCanSetWeight() public {
+        // Ensure the test is not called by the chairperson
+        vm.prank(voter1);
+        
+        // Expect a revert with the specific error message
         vm.expectRevert("Only chairperson can set voter weight.");
         ballot.setVoterWeight(voter1, 5); 
     }
