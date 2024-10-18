@@ -7,7 +7,7 @@ please run this bash to checkout the results by linux or wsl.
 ```bash
 git clone https://github.com/yuuuuuuan/tintinland_solidity.git
 
-cd class_*
+cd ./tintinland_solidity/class_*
 
 forge build
 
